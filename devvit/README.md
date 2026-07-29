@@ -14,7 +14,7 @@
 > [!NOTE]
 > ## REDDIT DEVVIT ARCHITECTURE
 >
-> This repository contains the TypeScript Devvit application and HTML5 webview entrypoint (`devvit/webroot/index.html`). It connects to the central Sortling REST API (`https://sortling-bot.onrender.com/api/`) to execute recommendation queries.
+> This repository contains the TypeScript Devvit application and HTML5 webview entrypoint (`webroot/index.html`). It connects to the central Sortling REST API (`https://sortling-bot.onrender.com/api/`) to execute recommendation queries.
 
 ---
 
@@ -47,9 +47,9 @@ graph TD
 
 ## 📂 Codebase Structure
 
-* **`Devvit Entrypoint` ([main.ts](devvit/src/main.ts)):** Configures Reddit API triggers, installs custom post handlers, and defines moderator menu items.
-* **`Webview Application` ([index.html](devvit/webroot/index.html)):** Single-page web app rendering Home, Quiz, Results, and Directory views with asynchronous fetch controllers.
-* **`Configuration` ([devvit.json](devvit/devvit.json)):** Manifest specifying app permissions (Reddit API, HTTP), webroot entrypoints, and target subreddits.
+* **`Devvit Entrypoint` ([main.ts](src/main.ts)):** Configures Reddit API triggers, installs custom post handlers, and defines moderator menu items.
+* **`Webview Application` ([index.html](webroot/index.html)):** Single-page web app rendering Home, Quiz, Results, and Directory views with asynchronous fetch controllers.
+* **`Configuration` ([devvit.json](devvit.json)):** Manifest specifying app permissions (Reddit API, HTTP), webroot entrypoints, and target subreddits.
 
 ---
 
@@ -58,7 +58,7 @@ graph TD
 1. Clone the repository and install dependencies:
    ```bash
    git clone https://github.com/sorts-me/Reddit.git
-   cd Reddit/devvit
+   cd Reddit
    npm install
    ```
 
