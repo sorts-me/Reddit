@@ -1,6 +1,6 @@
 # Sortling Reddit App (`sorts-me/reddit`)
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Reddit Devvit](https://img.shields.io/badge/Reddit-Devvit%20SDK-FF4500?style=for-the-badge&logo=reddit&logoColor=white)](https://developers.reddit.com)
 [![REST API](https://img.shields.io/badge/Backend-REST%20CORS-46E3B7?style=for-the-badge&logo=fastapi&logoColor=white)](https://sortling-bot.onrender.com)
@@ -81,4 +81,4 @@ graph TD
 
 ## 📜 License
 
-Licensed under the MIT License.
+Licensed under the Apache License 2.0.
