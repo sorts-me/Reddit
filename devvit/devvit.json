@@ -1,0 +1,41 @@
+{
+  "name": "sortling",
+  "permissions": {
+    "reddit": {
+      "enable": true
+    },
+    "http": {
+      "enable": true
+    }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "triggers": {
+    "onAppInstall": "/internal/triggers/on-app-install",
+    "onAppUpgrade": "/internal/triggers/on-app-upgrade"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Create Sortling Campus Guide Post",
+        "location": "subreddit",
+        "forUserType": "user",
+        "endpoint": "/internal/menu/post-create"
+      }
+    ]
+  },
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "entry": "webroot/index.html",
+        "height": "tall"
+      }
+    }
+  },
+  "dev": {
+    "subreddit": "sortling_dev"
+  }
+}
