@@ -1,78 +1,101 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { context, createServer, getServerPort, reddit } from '@devvit/web/server';
+import { CLUBS_DATA, EVENTS_DATA } from './data.js';
+import { createSession, submitAnswer } from './engine.js';
 
 const app = new Hono();
 const internal = new Hono();
 const api = new Hono();
 
-const BACKEND_URL = 'https://sortling-bot.onrender.com';
+// ── Standalone REST API Endpoints (100% Native on Devvit) ───────────────────
 
-// ── Proxy Endpoints for Webview Client ─────────────────────────────────────
-
-api.get('/university', async (c) => {
-  try {
-    const url = new URL(c.req.url);
-    const targetUrl = `${BACKEND_URL}/api/university${url.search}`;
-    const res = await fetch(targetUrl);
-    const data = await res.json();
-    return c.json(data, res.status as any);
-  } catch (err) {
-    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
-  }
+api.get('/university', (c) => {
+  return c.json({
+    id: 1,
+    slug: 'mahindra',
+    name: 'Mahindra University',
+    website: 'https://www.mahindrauniversity.edu.in',
+    description: 'Mahindra University Verified Campus Directory & Club Finder',
+    reddit_subreddit: 'sortling_dev',
+  });
 });
 
-api.get('/clubs', async (c) => {
-  try {
-    const url = new URL(c.req.url);
-    const targetUrl = `${BACKEND_URL}/api/clubs${url.search}`;
-    const res = await fetch(targetUrl);
-    const data = await res.json();
-    return c.json(data, res.status as any);
-  } catch (err) {
-    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+api.get('/clubs', (c) => {
+  const query = (c.req.query('query') || '').toLowerCase().trim();
+  let clubs = CLUBS_DATA;
+  if (query) {
+    clubs = CLUBS_DATA.filter(
+      (club) =>
+        club.name.toLowerCase().includes(query) ||
+        club.description.toLowerCase().includes(query) ||
+        club.category.toLowerCase().includes(query)
+    );
   }
+  return c.json({
+    count: clubs.length,
+    clubs: clubs,
+  });
 });
 
-api.get('/events', async (c) => {
-  try {
-    const url = new URL(c.req.url);
-    const targetUrl = `${BACKEND_URL}/api/events${url.search}`;
-    const res = await fetch(targetUrl);
-    const data = await res.json();
-    return c.json(data, res.status as any);
-  } catch (err) {
-    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
-  }
+api.get('/events', (c) => {
+  return c.json({
+    count: EVENTS_DATA.length,
+    events: EVENTS_DATA,
+  });
 });
 
 api.post('/sort/session', async (c) => {
   try {
-    const body = await c.req.json();
-    const res = await fetch(`${BACKEND_URL}/api/sort/session`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+    const body = await c.req.json().catch(() => ({}));
+    const userId = body.user_id || 'reddit_user';
+    const { sessionId, firstQuestion } = createSession(userId);
+
+    return c.json({
+      session_id: sessionId,
+      question: {
+        id: firstQuestion.id,
+        code: firstQuestion.code,
+        text: firstQuestion.text,
+        options: firstQuestion.options.map((o) => ({ id: o.id, text: o.text })),
+      },
     });
-    const data = await res.json();
-    return c.json(data, res.status as any);
   } catch (err) {
-    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+    console.error('Create session error:', err);
+    return c.json({ error: 'Failed to initialize quiz session' }, 500);
   }
 });
 
 api.post('/sort/answer', async (c) => {
   try {
     const body = await c.req.json();
-    const res = await fetch(`${BACKEND_URL}/api/sort/answer`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+    const sessionId = body.session_id;
+    const questionId = Number(body.question_id);
+    const optionId = Number(body.option_id);
+
+    const result = submitAnswer(sessionId, questionId, optionId);
+
+    if (result.completed) {
+      return c.json({
+        completed: true,
+        recommendations: result.recommendations,
+      });
+    }
+
+    const nextQ = result.nextQuestion!;
+    return c.json({
+      completed: false,
+      session_id: sessionId,
+      question: {
+        id: nextQ.id,
+        code: nextQ.code,
+        text: nextQ.text,
+        options: nextQ.options.map((o) => ({ id: o.id, text: o.text })),
+      },
     });
-    const data = await res.json();
-    return c.json(data, res.status as any);
   } catch (err) {
-    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+    console.error('Submit answer error:', err);
+    return c.json({ error: 'Failed to process answer' }, 500);
   }
 });
 
