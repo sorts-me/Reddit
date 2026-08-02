@@ -4,8 +4,82 @@ import { context, createServer, getServerPort, reddit } from '@devvit/web/server
 
 const app = new Hono();
 const internal = new Hono();
+const api = new Hono();
 
-// Trigger: AppInstall
+const BACKEND_URL = 'https://sortling-bot.onrender.com';
+
+// ── Proxy Endpoints for Webview Client ─────────────────────────────────────
+
+api.get('/university', async (c) => {
+  try {
+    const url = new URL(c.req.url);
+    const targetUrl = `${BACKEND_URL}/api/university${url.search}`;
+    const res = await fetch(targetUrl);
+    const data = await res.json();
+    return c.json(data, res.status as any);
+  } catch (err) {
+    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+  }
+});
+
+api.get('/clubs', async (c) => {
+  try {
+    const url = new URL(c.req.url);
+    const targetUrl = `${BACKEND_URL}/api/clubs${url.search}`;
+    const res = await fetch(targetUrl);
+    const data = await res.json();
+    return c.json(data, res.status as any);
+  } catch (err) {
+    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+  }
+});
+
+api.get('/events', async (c) => {
+  try {
+    const url = new URL(c.req.url);
+    const targetUrl = `${BACKEND_URL}/api/events${url.search}`;
+    const res = await fetch(targetUrl);
+    const data = await res.json();
+    return c.json(data, res.status as any);
+  } catch (err) {
+    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+  }
+});
+
+api.post('/sort/session', async (c) => {
+  try {
+    const body = await c.req.json();
+    const res = await fetch(`${BACKEND_URL}/api/sort/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    return c.json(data, res.status as any);
+  } catch (err) {
+    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+  }
+});
+
+api.post('/sort/answer', async (c) => {
+  try {
+    const body = await c.req.json();
+    const res = await fetch(`${BACKEND_URL}/api/sort/answer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    return c.json(data, res.status as any);
+  } catch (err) {
+    return c.json({ error: 'Backend API unavailable', details: String(err) }, 502);
+  }
+});
+
+app.route('/api', api);
+
+// ── Internal Triggers & Moderator Menu Handlers ─────────────────────────────
+
 internal.post('/triggers/on-app-install', async (c) => {
   try {
     const subName = context.subredditName;
@@ -24,7 +98,6 @@ internal.post('/triggers/on-app-install', async (c) => {
   }
 });
 
-// Trigger: AppUpgrade
 internal.post('/triggers/on-app-upgrade', async (c) => {
   try {
     const subName = context.subredditName;
@@ -43,7 +116,6 @@ internal.post('/triggers/on-app-upgrade', async (c) => {
   }
 });
 
-// Menu Item: Create Sortling Campus Guide Post
 internal.post('/menu/post-create', async (c) => {
   try {
     const subName = context.subredditName || 'sortling_dev';

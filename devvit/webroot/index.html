@@ -112,7 +112,7 @@
   </div>
 
   <script>
-    let API_BASE = 'https://sortling-bot.onrender.com';
+    let API_BASE = '';
     let sessionId = null;
     let currentQuestion = null;
 
@@ -121,13 +121,7 @@
         const res = await fetch(`${API_BASE}${path}`, options);
         if (res.ok) return await res.json();
       } catch (err) {
-        console.warn('Cloud API unavailable, trying local server...', err);
-      }
-      try {
-        const localRes = await fetch(`http://localhost:10000${path}`, options);
-        if (localRes.ok) return await localRes.json();
-      } catch (err) {
-        console.error('Both Cloud and Local APIs failed:', err);
+        console.warn('Devvit server API call failed:', err);
       }
       return null;
     }
